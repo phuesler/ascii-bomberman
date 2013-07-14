@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby -w
 #
 require 'curses'
+require_relative 'game'
 
 def read_keyboard_input(input_buffer)
   Thread.new do
@@ -16,11 +17,10 @@ def init_curses
 end
 
 def game_loop(input_buffer)
+  game = Game.new(11, 7)
   Thread.new do
     loop do
-      Curses.setpos(0, 0)
-      Curses.addstr("render #{Time.now.to_s} #{input_buffer.size}")
-      Curses.refresh
+      game.display
       sleep(0.25)
     end
   end
