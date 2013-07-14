@@ -14,15 +14,11 @@ class Game
     @width = width
     @height = height
     @board = setup_blocks(Array.new(height){Array.new(width, ' ')}, width, height)
+    @player = {x: 0, y: 0}
+    @board[0][0] = PLAYER
   end
 
-  def game_over
-    Curses.setpos(0, 0)
-    Curses.addstr("GAME OVER");
-    Curses.refresh
-  end
-
-  # we need to drow from top to bottom
+  # we need to draw from top to bottom
   # however 0,0 is on the lower, left
   # reverse the row indices
   def display
@@ -42,48 +38,25 @@ class Game
     Curses.refresh
   end
 
-  def update(state = {})
-    clean_board
-    update_bombs(state[:bombs] || [])
-    update_powerups(state[:power_ups] || [])
-    update_boxes(state[:boxes] || [])
-    update_players(state[:players] || [])
-    display
+  def update(key)
+      return if key.nil?
+      @board[@player[:x]][@player[:y]] = ' '
+      case key
+        when :up
+          @player[:y] = @player[:y] + 1
+        when :down
+          @player[:y] = @player[:y] - 1
+        when :left
+          @player[:x] = @player[:x] - 1
+        when :right
+          @player[:x] = @player[:x] + 1
+        else
+          raise "invalid key:#{key}"
+      end
+      @board[@player[:x]][@player[:y]] = 'X'
   end
 
   private
-
-  def update_bombs(bombs)
-    bombs.each do |bomb|
-      @board[bomb[:y]][bomb[:x]] = BOMB
-    end
-  end
-
-  def update_powerups(power_ups)
-    power_ups.each do |power_up|
-      if(power_up[:type] == "bomb")
-        @board[power_up[:y]][power_up[:x]] = POWER_UP_BOMB
-      else
-        @board[power_up[:y]][power_up[:x]] = POWER_UP_FIRE
-      end
-    end
-  end
-
-  def update_players(players)
-    players.each_with_index do |player, index|
-      if player[:state] == 'alive'
-        @board[player[:y]][player[:x]] = "#{PLAYER}#{index}"
-      else
-        @board[player[:y]][player[:x]] = ' '
-      end
-    end
-  end
-
-  def update_boxes(boxes)
-    boxes.each do |box|
-      @board[box[:y]][box[:x]] = MUD
-    end
-  end
 
   def draw_row(cols)
     s = "|"
@@ -114,16 +87,6 @@ class Game
       (y + 1) % 2 == 0 &&
       x > 0 && x < width - 1 &&
       (x + 1) % 2 == 0
-  end
-
-  def clean_board
-    @board.each_with_index do |row, y|
-      row.each_with_index do |cell, x|
-        unless cell == STONE_BLOCK
-          row[x] = ' '
-        end
-      end
-    end
   end
 
 end

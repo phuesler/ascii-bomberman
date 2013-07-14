@@ -4,12 +4,27 @@ require 'curses'
 require_relative 'game'
 
 def read_keyboard_input(input_buffer)
-  Thread.new do
+  t = Thread.new do
     loop do
-      input_buffer << Curses.getch
+     key = case Curses.getch
+        when Curses::Key::UP then
+          :up
+        when Curses::Key::DOWN then
+          :down
+        when Curses::Key::RIGHT then
+          :right
+        when Curses::Key::LEFT then
+          :left
+        else
+          nil
+        end
+      input_buffer <<  key unless key.nil?
     end
   end
+   t.abort_on_exception = true
+   t
 end
+
 def init_curses
   Curses.noecho # do not show typed keys
   Curses.init_screen
@@ -18,12 +33,15 @@ end
 
 def game_loop(input_buffer)
   game = Game.new(11, 7)
-  Thread.new do
+  t = Thread.new do
     loop do
+      game.update(input_buffer.shift)
       game.display
       sleep(0.25)
     end
   end
+  t.abort_on_exception = true
+  t
 end
 
 def run
