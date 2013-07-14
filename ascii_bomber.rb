@@ -2,6 +2,7 @@
 #
 require 'curses'
 require_relative 'game'
+require_relative 'ring_buffer'
 
 def read_keyboard_input(input_buffer)
   t = Thread.new do
@@ -19,6 +20,7 @@ def read_keyboard_input(input_buffer)
           nil
         end
       input_buffer <<  key unless key.nil?
+      sleep(0.2)
     end
   end
    t.abort_on_exception = true
@@ -37,7 +39,7 @@ def game_loop(input_buffer)
     loop do
       game.update(input_buffer.shift)
       game.display
-      sleep(0.25)
+      sleep(0.1)
     end
   end
   t.abort_on_exception = true
@@ -47,7 +49,7 @@ end
 def run
   begin
     init_curses
-    input_buffer = []
+    input_buffer = RingBuffer.new(5)
     keyboard = read_keyboard_input(input_buffer)
     game = game_loop(input_buffer)
     keyboard.join
