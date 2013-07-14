@@ -40,7 +40,7 @@ class Game
 
   def update(key)
       return if key.nil?
-      @board[@player[:x]][@player[:y]] = ' '
+      @board[@player[:y]][@player[:x]] = ' '
       case key
         when :up
           @player[:y] = @player[:y] + 1
@@ -53,7 +53,7 @@ class Game
         else
           raise "invalid key:#{key}"
       end
-      @board[@player[:x]][@player[:y]] = 'X'
+      @board[@player[:y]][@player[:x]] = 'X'
   end
 
   private
